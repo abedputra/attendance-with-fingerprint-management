@@ -66,13 +66,13 @@ if($dataLevel == "is_admin"){
 Please follow 2 steps:<br>
 1. Settings System Management
 Please check this<br>
-(Soon)<br>
+https://github.com/abedputra/attendance-with-fingerprint-management/wiki/Settings-Management-System-%3F<br>
 Please check this video how to istall the system
 https://www.youtube.com/watch?v=s8pZl5UoT40
 
 2. Settings Android Application<br>
 Please check this<br>
-(Soon)
+https://github.com/abedputra/attendance-with-fingerprint-management/wiki/Settings-the-app-%3F
 
 # -----How to get KEY?
 -Go to Attendance login system link<br>
