@@ -6,7 +6,7 @@ Simple application for employee attendance using fingerprint. <b>(You need insta
 Created By me [Abed Putra](https://connectwithdev.com/)
 
 # Want to get an Android application source code?
-(Soon)
+https://codecanyon.net/item/attendance-with-fingerprint-android-system-managemnet/25407573
 
 # Feature
 - Add user
@@ -32,7 +32,7 @@ Created By me [Abed Putra](https://connectwithdev.com/)
 - is_subscriber
 
 # Wiki
-(Soon)
+https://github.com/abedputra/attendance-with-fingerprint-management/wiki
 
 # login
 - Pass : admin
