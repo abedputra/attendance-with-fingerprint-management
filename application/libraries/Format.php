@@ -9,7 +9,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author    Phil Sturgeon, Chris Kacerguis, @softwarespot
  * @license   http://www.dbad-license.org/
  */
-class Format {
+class Format
+{
 
     /**
      * Array output format
@@ -50,27 +51,24 @@ class Format {
      * Default format of this class
      */
     const DEFAULT_FORMAT = self::JSON_FORMAT; // Couldn't be DEFAULT, as this is a keyword
-
-    /**
-     * CodeIgniter instance
-     *
-     * @var object
-     */
-    private $_CI;
-
     /**
      * Data to parse
      *
      * @var mixed
      */
     protected $_data = [];
-
     /**
      * Type to convert from
      *
      * @var string
      */
     protected $_from_type = NULL;
+    /**
+     * CodeIgniter instance
+     *
+     * @var object
+     */
+    private $_CI;
 
     /**
      * DO NOT CALL THIS DIRECTLY, USE factory()
@@ -89,15 +87,11 @@ class Format {
         $this->_CI->load->helper('inflector');
 
         // If the provided data is already formatted we should probably convert it to an array
-        if ($from_type !== NULL)
-        {
-            if (method_exists($this, '_from_'.$from_type))
-            {
-                $data = call_user_func([$this, '_from_'.$from_type], $data);
-            }
-            else
-            {
-                throw new Exception('Format class does not support conversion from "'.$from_type.'".');
+        if ($from_type !== NULL) {
+            if (method_exists($this, '_from_' . $from_type)) {
+                $data = call_user_func([$this, '_from_' . $from_type], $data);
+            } else {
+                throw new Exception('Format class does not support conversion from "' . $from_type . '".');
             }
         }
 
@@ -135,26 +129,20 @@ class Format {
     {
         // If no data is passed as a parameter, then use the data passed
         // via the constructor
-        if ($data === NULL && func_num_args() === 0)
-        {
+        if ($data === NULL && func_num_args() === 0) {
             $data = $this->_data;
         }
 
         // Cast as an array if not already
-        if (is_array($data) === FALSE)
-        {
-            $data = (array) $data;
+        if (is_array($data) === FALSE) {
+            $data = (array)$data;
         }
 
         $array = [];
-        foreach ((array) $data as $key => $value)
-        {
-            if (is_object($value) === TRUE || is_array($value) === TRUE)
-            {
+        foreach ((array)$data as $key => $value) {
+            if (is_object($value) === TRUE || is_array($value) === TRUE) {
                 $array[$key] = $this->to_array($value);
-            }
-            else
-            {
+            } else {
                 $array[$key] = $value;
             }
         }
@@ -173,34 +161,28 @@ class Format {
      */
     public function to_xml($data = NULL, $structure = NULL, $basenode = 'xml')
     {
-        if ($data === NULL && func_num_args() === 0)
-        {
+        if ($data === NULL && func_num_args() === 0) {
             $data = $this->_data;
         }
 
-        if ($structure === NULL)
-        {
+        if ($structure === NULL) {
             $structure = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><$basenode />");
         }
 
         // Force it to be something useful
-        if (is_array($data) === FALSE && is_object($data) === FALSE)
-        {
-            $data = (array) $data;
+        if (is_array($data) === FALSE && is_object($data) === FALSE) {
+            $data = (array)$data;
         }
 
-        foreach ($data as $key => $value)
-        {
+        foreach ($data as $key => $value) {
 
             //change false/true to 0/1
-            if (is_bool($value))
-            {
-                $value = (int) $value;
+            if (is_bool($value)) {
+                $value = (int)$value;
             }
 
             // no numeric keys in our xml please!
-            if (is_numeric($key))
-            {
+            if (is_numeric($key)) {
                 // make string key...
                 $key = (singular($basenode) != $basenode) ? singular($basenode) : 'item';
             }
@@ -208,29 +190,22 @@ class Format {
             // replace anything not alpha numeric
             $key = preg_replace('/[^a-z_\-0-9]/i', '', $key);
 
-            if ($key === '_attributes' && (is_array($value) || is_object($value)))
-            {
+            if ($key === '_attributes' && (is_array($value) || is_object($value))) {
                 $attributes = $value;
-                if (is_object($attributes))
-                {
+                if (is_object($attributes)) {
                     $attributes = get_object_vars($attributes);
                 }
 
-                foreach ($attributes as $attribute_name => $attribute_value)
-                {
+                foreach ($attributes as $attribute_name => $attribute_value) {
                     $structure->addAttribute($attribute_name, $attribute_value);
                 }
-            }
-            // if there is another array found recursively call this function
-            elseif (is_array($value) || is_object($value))
-            {
+            } // if there is another array found recursively call this function
+            elseif (is_array($value) || is_object($value)) {
                 $node = $structure->addChild($key);
 
                 // recursive call.
                 $this->to_xml($value, $node, $key);
-            }
-            else
-            {
+            } else {
                 // add single node.
                 $value = htmlspecialchars(html_entity_decode($value, ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8');
 
@@ -252,25 +227,20 @@ class Format {
     {
         // If no data is passed as a parameter, then use the data passed
         // via the constructor
-        if ($data === NULL && func_num_args() === 0)
-        {
+        if ($data === NULL && func_num_args() === 0) {
             $data = $this->_data;
         }
 
         // Cast as an array if not already
-        if (is_array($data) === FALSE)
-        {
-            $data = (array) $data;
+        if (is_array($data) === FALSE) {
+            $data = (array)$data;
         }
 
         // Check if it's a multi-dimensional array
-        if (isset($data[0]) && count($data) !== count($data, COUNT_RECURSIVE))
-        {
+        if (isset($data[0]) && count($data) !== count($data, COUNT_RECURSIVE)) {
             // Multi-dimensional array
             $headings = array_keys($data[0]);
-        }
-        else
-        {
+        } else {
             // Single array
             $headings = array_keys($data);
             $data = [$data];
@@ -281,8 +251,7 @@ class Format {
 
         $this->_CI->table->set_heading($headings);
 
-        foreach ($data as $row)
-        {
+        foreach ($data as $row) {
             // Suppressing the "array to string conversion" notice
             // Keep the "evil" @ here
             $row = @array_map('strval', $row);
@@ -307,44 +276,36 @@ class Format {
     {
         // Use a threshold of 1 MB (1024 * 1024)
         $handle = fopen('php://temp/maxmemory:1048576', 'w');
-        if ($handle === FALSE)
-        {
+        if ($handle === FALSE) {
             return NULL;
         }
 
         // If no data is passed as a parameter, then use the data passed
         // via the constructor
-        if ($data === NULL && func_num_args() === 0)
-        {
+        if ($data === NULL && func_num_args() === 0) {
             $data = $this->_data;
         }
 
         // If NULL, then set as the default delimiter
-        if ($delimiter === NULL)
-        {
+        if ($delimiter === NULL) {
             $delimiter = ',';
         }
 
         // If NULL, then set as the default enclosure
-        if ($enclosure === NULL)
-        {
+        if ($enclosure === NULL) {
             $enclosure = '"';
         }
 
         // Cast as an array if not already
-        if (is_array($data) === FALSE)
-        {
-            $data = (array) $data;
+        if (is_array($data) === FALSE) {
+            $data = (array)$data;
         }
 
         // Check if it's a multi-dimensional array
-        if (isset($data[0]) && count($data) !== count($data, COUNT_RECURSIVE))
-        {
+        if (isset($data[0]) && count($data) !== count($data, COUNT_RECURSIVE)) {
             // Multi-dimensional array
             $headings = array_keys($data[0]);
-        }
-        else
-        {
+        } else {
             // Single array
             $headings = array_keys($data);
             $data = [$data];
@@ -353,12 +314,10 @@ class Format {
         // Apply the headings
         fputcsv($handle, $headings, $delimiter, $enclosure);
 
-        foreach ($data as $record)
-        {
+        foreach ($data as $record) {
             // If the record is not an array, then break. This is because the 2nd param of
             // fputcsv() should be an array
-            if (is_array($record) === FALSE)
-            {
+            if (is_array($record) === FALSE) {
                 break;
             }
 
@@ -396,29 +355,24 @@ class Format {
     {
         // If no data is passed as a parameter, then use the data passed
         // via the constructor
-        if ($data === NULL && func_num_args() === 0)
-        {
+        if ($data === NULL && func_num_args() === 0) {
             $data = $this->_data;
         }
 
         // Get the callback parameter (if set)
         $callback = $this->_CI->input->get('callback');
 
-        if (empty($callback) === TRUE)
-        {
+        if (empty($callback) === TRUE) {
             return json_encode($data, JSON_UNESCAPED_UNICODE);
-        }
-
-        // We only honour a jsonp callback which are valid javascript identifiers
-        elseif (preg_match('/^[a-z_\$][a-z0-9\$_]*(\.[a-z_\$][a-z0-9\$_]*)*$/i', $callback))
-        {
+        } // We only honour a jsonp callback which are valid javascript identifiers
+        elseif (preg_match('/^[a-z_\$][a-z0-9\$_]*(\.[a-z_\$][a-z0-9\$_]*)*$/i', $callback)) {
             // Return the data as encoded json with a callback
-            return $callback.'('.json_encode($data, JSON_UNESCAPED_UNICODE).');';
+            return $callback . '(' . json_encode($data, JSON_UNESCAPED_UNICODE) . ');';
         }
 
         // An invalid jsonp callback function provided.
         // Though I don't believe this should be hardcoded here
-        $data['warning'] = 'INVALID JSONP CALLBACK: '.$callback;
+        $data['warning'] = 'INVALID JSONP CALLBACK: ' . $callback;
 
         return json_encode($data, JSON_UNESCAPED_UNICODE);
     }
@@ -434,8 +388,7 @@ class Format {
     {
         // If no data is passed as a parameter, then use the data passed
         // via the constructor
-        if ($data === NULL && func_num_args() === 0)
-        {
+        if ($data === NULL && func_num_args() === 0) {
             $data = $this->_data;
         }
 
@@ -453,8 +406,7 @@ class Format {
     {
         // If no data is passed as a parameter, then use the data passed
         // via the constructor
-        if ($data === NULL && func_num_args() === 0)
-        {
+        if ($data === NULL && func_num_args() === 0) {
             $data = $this->_data;
         }
 
@@ -469,7 +421,7 @@ class Format {
      */
     protected function _from_xml($data)
     {
-        return $data ? (array) simplexml_load_string($data, 'SimpleXMLElement', LIBXML_NOCDATA) : [];
+        return $data ? (array)simplexml_load_string($data, 'SimpleXMLElement', LIBXML_NOCDATA) : [];
     }
 
     /**
@@ -484,14 +436,12 @@ class Format {
     protected function _from_csv($data, $delimiter = ',', $enclosure = '"')
     {
         // If NULL, then set as the default delimiter
-        if ($delimiter === NULL)
-        {
+        if ($delimiter === NULL) {
             $delimiter = ',';
         }
 
         // If NULL, then set as the default enclosure
-        if ($enclosure === NULL)
-        {
+        if ($enclosure === NULL) {
             $enclosure = '"';
         }
 

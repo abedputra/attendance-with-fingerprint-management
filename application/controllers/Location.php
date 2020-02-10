@@ -1,7 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Location extends CI_Controller {
+class Location extends CI_Controller
+{
 
     public $status;
     public $roles;
@@ -18,31 +19,30 @@ class Location extends CI_Controller {
         $this->load->library('userlevel');
     }
 
-    public function settingLoc()
+    public function index()
     {
         //user data from session
         $data = $this->session->userdata;
-        if(empty($data)){
-            redirect(site_url().'main/login/');
+        if (empty($data)) {
+            redirect(site_url() . 'main/login/');
         }
 
         //check user level
-        if(empty($data['role'])){
-            redirect(site_url().'main/login/');
+        if (empty($data['role'])) {
+            redirect(site_url() . 'main/login/');
         }
         $dataLevel = $this->userlevel->checkLevel($data['role']);
         //check user level
 
         $data['title'] = "Settings Your Office Area";
 
-        if(empty($this->session->userdata['email'])){
-            redirect(site_url().'main/login/');
-        }else{
-            $this->load->view('header', $data);
-            $this->load->view('navbar', $data);
-            $this->load->view('container');
-            $this->load->view('location', $data);
-            $this->load->view('footer');
+        if (empty($this->session->userdata['email'])) {
+            redirect(site_url() . 'main/login/');
+        } else {
+            $this->load->view('template/header', $data);
+            $this->load->view('template/navbar', $data);
+            $this->load->view('template/container');
+            $this->load->view('office_location/location', $data);
         }
     }
 }

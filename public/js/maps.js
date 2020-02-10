@@ -3,6 +3,7 @@ var drawingManager;
 var shapes = [];
 var myPolygon;
 var drawShapes = [];
+var checkLocation;
 
 function initialize() {
     var myLatlng = new google.maps.LatLng(51.51686166794058, 3.5945892333984375);
@@ -36,26 +37,30 @@ function initialize() {
         url: baseURL + "api/data/showAllDataLocation",
         type: "get",
         success: function (response) {
-          if(response.length > 0){
-            for(var i=0;i<response.length;i++) 
-            {
-              drawShapes.push(new google.maps.LatLng(response[i].lat,response[i].longt));
+            if (response.length > 0) {
+                for (var i = 0; i < response.length; i++) {
+                    drawShapes.push(new google.maps.LatLng(response[i].lat, response[i].longt));
+                }
+            } else {
+                checkLocation = "No Data";
+                console.log("No Data");
             }
-          }else{
-            console.log("No Data");
-          }
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-           console.log(textStatus, errorThrown);
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
         }
-    }).done(function(response){
+    }).done(function (response) {
         myPolygon = new google.maps.Polygon({
             path: drawShapes,
             editable: true,
             // draggable: true
         });
 
-        myLatlng = new google.maps.LatLng(response[0].lat, response[0].longt);
+        if(checkLocation == "No Data"){
+            myLatlng = new google.maps.LatLng(51.51686166794058, 3.5945892333984375);
+        }else{
+            myLatlng = new google.maps.LatLng(response[0].lat, response[0].longt);
+        }
         mapOptions = {
             zoom: 18,
             center: myLatlng,
@@ -87,7 +92,6 @@ function initialize() {
     // add a listener for the drawing mode change event, delete any existing polygons
     google.maps.event.addListener(drawingManager, "drawingmode_changed", function () {
         if (drawingManager.getDrawingMode() != null) {
-            // console.log(shapes);
             myPolygon.setMap(null);
             for (var i = 0; i < shapes.length; i++) {
                 shapes[i].setMap(null);
@@ -118,17 +122,17 @@ function overlayDragListener(overlay) {
 //Display Coordinates below map
 function getPolygonCoordsFirst() {
     var len = myPolygon.getPath().getLength();
-    var checkLast = len-1;
+    var checkLast = len - 1;
     htmlStr = "";
     for (var i = 0; i < len; i++) {
 
-    if(i == checkLast){
-      htmlStr += myPolygon.getPath().getAt(i).toUrlValue(10);
-    }else{
-      htmlStr += myPolygon.getPath().getAt(i).toUrlValue(10) + "---";
-    }
-    //Use this one instead if you want to get rid of the wrap > new google.maps.LatLng(),
-    //htmlStr += "" + myPolygon.getPath().getAt(i).toUrlValue(5);
+        if (i == checkLast) {
+            htmlStr += myPolygon.getPath().getAt(i).toUrlValue(10);
+        } else {
+            htmlStr += myPolygon.getPath().getAt(i).toUrlValue(10) + "---";
+        }
+        //Use this one instead if you want to get rid of the wrap > new google.maps.LatLng(),
+        //htmlStr += "" + myPolygon.getPath().getAt(i).toUrlValue(5);
     }
     document.getElementById('info').innerHTML = htmlStr;
 
@@ -138,88 +142,87 @@ function getPolygonCoordsFirst() {
     stringMD5 += "[";
 
     for (var i = 0; i < split.length; i++) {
-        if(i == checkLastSplit){
-          stringMD5 += "lat/lng: ("+split[i]+")";
-        }else{
-            stringMD5 += "lat/lng: ("+split[i]+"), ";
+        if (i == checkLastSplit) {
+            stringMD5 += "lat/lng: (" + split[i] + ")";
+        } else {
+            stringMD5 += "lat/lng: (" + split[i] + "), ";
         }
     }
     stringMD5 += "]";
     $.ajax({
-    url: baseURL + "api/data/storeMd5Location",
+        url: baseURL + "api/data/storeMd5Location",
         type: "post",
-        data: {'md5' : stringMD5},
+        data: {'md5': stringMD5},
         success: function (response) {
-          console.log(response.message);
+            console.log(response.message);
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-           console.log(textStatus, errorThrown);
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
         }
     });
 }
 
 //Display Coordinates below map
 function getPolygonCoords(overlay) {
-  var len = overlay.getPath().getLength();
-  var checkLast = len-1;
-  htmlStr = "";
-  for (var i = 0; i < len; i++) {
+    var len = overlay.getPath().getLength();
+    var checkLast = len - 1;
+    htmlStr = "";
+    for (var i = 0; i < len; i++) {
 
-    if(i == checkLast){
-      htmlStr += overlay.getPath().getAt(i).toUrlValue(10);
-    }else{
-      htmlStr += overlay.getPath().getAt(i).toUrlValue(10) + "---";
+        if (i == checkLast) {
+            htmlStr += overlay.getPath().getAt(i).toUrlValue(10);
+        } else {
+            htmlStr += overlay.getPath().getAt(i).toUrlValue(10) + "---";
+        }
+        //Use this one instead if you want to get rid of the wrap > new google.maps.LatLng(),
+        //htmlStr += "" + myPolygon.getPath().getAt(i).toUrlValue(5);
     }
-    //Use this one instead if you want to get rid of the wrap > new google.maps.LatLng(),
-    //htmlStr += "" + myPolygon.getPath().getAt(i).toUrlValue(5);
-  }
-  document.getElementById('info').innerHTML = htmlStr;
+    document.getElementById('info').innerHTML = htmlStr;
 
-  var stringMD5 = "";
-  var split = htmlStr.split("---");
-  var checkLastSplit = split.length - 1;
-  stringMD5 += "[";
+    var stringMD5 = "";
+    var split = htmlStr.split("---");
+    var checkLastSplit = split.length - 1;
+    stringMD5 += "[";
 
-  for (var i = 0; i < split.length; i++) {
-    if(i == checkLastSplit){
-      stringMD5 += "lat/lng: ("+split[i]+")";
-    }else{
-        stringMD5 += "lat/lng: ("+split[i]+"), ";
+    for (var i = 0; i < split.length; i++) {
+        if (i == checkLastSplit) {
+            stringMD5 += "lat/lng: (" + split[i] + ")";
+        } else {
+            stringMD5 += "lat/lng: (" + split[i] + "), ";
+        }
     }
-  }
-  stringMD5 += "]";
-  console.log(stringMD5);
+    stringMD5 += "]";
 
     $.ajax({
-    url: baseURL + "api/data/storeMd5Location",
+        url: baseURL + "api/data/storeMd5Location",
         type: "post",
-        data: {'md5' : stringMD5},
+        data: {'md5': stringMD5},
         success: function (response) {
-          console.log(response.message);
+            console.log(response.message);
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-           console.log(textStatus, errorThrown);
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
         }
     });
 }
 
-$('#saveLocation').click(function(){
+$('#saveLocation').click(function () {
     deleteLocationTable();
 
-    setTimeout(function(){
-      var getCoordinate = htmlStr.split("---");
+    setTimeout(function () {
+        var getCoordinate = htmlStr.split("---");
 
-      var i=0;
-      var myTimer = setInterval(function(){
-        saveLocation(getCoordinate[i]); i++;  
+        var i = 0;
+        var myTimer = setInterval(function () {
+            saveLocation(getCoordinate[i]);
+            i++;
 
-        if(getCoordinate.length == i){
-          console.log(getCoordinate.length + " --- " + i)
-          clearInterval(myTimer);
-        }
+            if (getCoordinate.length == i) {
+                clearInterval(myTimer);
+            }
 
-      },900);
-    
+        }, 900);
+
     }, 1000);
 });
 
@@ -227,19 +230,19 @@ function saveLocation(latLongt) {
     var splitCoordinate = latLongt.split(',');
 
     data = {
-        'lat' : splitCoordinate[0],
-        'longt' : splitCoordinate[1],
+        'lat': splitCoordinate[0],
+        'longt': splitCoordinate[1],
     }
 
     $.ajax({
         url: baseURL + "api/data/storeLocation",
         type: "post",
-        data: data ,
+        data: data,
         success: function (response) {
-          console.log(response.message);
+            console.log(response.message);
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-           console.log(textStatus, errorThrown);
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
         }
     });
 }
@@ -252,12 +255,12 @@ function deleteLocationTable() {
         success: function (response) {
             console.log("Success");
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-           console.log(textStatus, errorThrown);
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
         }
     });
 
-    setTimeout(function(){
+    setTimeout(function () {
         $('.reload').css('display', 'none');
     }, 6000);
 }

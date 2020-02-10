@@ -3,7 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 require APPPATH . 'libraries/REST_Controller.php';
 
-class Data extends REST_Controller {
+class Data extends REST_Controller
+{
 
     function __construct()
     {
@@ -15,11 +16,11 @@ class Data extends REST_Controller {
     public function index_post()
     {
         $key = $this->input->post('key');
-        $result = $this->user_model->getAllEmployee();
+        $result = $this->user_model->getHowManyPeople();
         $data['key'] = $result->key_insert;
 
-        if(!empty($key)){
-            if($key == $data['key']){
+        if (!empty($key)) {
+            if ($key == $data['key']) {
                 // index from a data store e.g. database
 
                 $dataLocation = $this->user_model->getLocationArea();
@@ -29,16 +30,16 @@ class Data extends REST_Controller {
                     'data' => $dataLocation
                 ];
 
-                if(count($data['data']) > 0){
+                if (count($data['data']) > 0) {
                     $this->response($data, REST_Controller::HTTP_OK);
-                }else{
+                } else {
                     $this->response(['message' => 'empty', "data" => 0], REST_Controller::HTTP_OK);
                 }
-                
-            }else{
+
+            } else {
                 $this->response(["message" => "Your key is wrong"], REST_Controller::HTTP_OK);
             }
-        }else{
+        } else {
             $this->response(["message" => "Please insert your key first!"], REST_Controller::HTTP_OK);
         }
     }
@@ -47,12 +48,12 @@ class Data extends REST_Controller {
     {
 
         $key = $this->input->post('key');
-        $result = $this->user_model->getAllEmployee();
+        $result = $this->user_model->getHowManyPeople();
         $data['key'] = $result->key_insert;
 
-        if(!empty($key)){
+        if (!empty($key)) {
 
-            if($key == $data['key']){
+            if ($key == $data['key']) {
 
                 $hashMd5 = $this->user_model->getMd5Location();
 
@@ -62,10 +63,10 @@ class Data extends REST_Controller {
                 ];
                 $this->response($data, REST_Controller::HTTP_OK);
 
-            }else{
+            } else {
                 $this->response(["message" => "Your key is wrong"], REST_Controller::HTTP_OK);
             }
-        }else{
+        } else {
             $this->response(["message" => "Please insert your key first!"], REST_Controller::HTTP_OK);
         }
     }
@@ -116,13 +117,13 @@ class Data extends REST_Controller {
 
             $key = $this->input->post('key');
 
-            $result = $this->user_model->getAllEmployee();
+            $result = $this->user_model->getHowManyPeople();
             $data['many_employee'] = $result->many_employee;
             $data['start'] = $result->start_time;
             $data['out'] = $result->out_time;
             $data['key'] = $result->key_insert;
-            if(!empty($key)){
-                if($key == $data['key']){
+            if (!empty($key)) {
+                if ($key == $data['key']) {
 
                     $Q = $this->security->xss_clean($this->input->post('q', TRUE));
                     $name = $this->security->xss_clean($this->input->post('name', TRUE));
@@ -130,16 +131,17 @@ class Data extends REST_Controller {
                     $location = $this->security->xss_clean($this->input->post('location', TRUE));
 
                     //Get time function
-                    function gettime ($total){
+                    function gettime($total)
+                    {
                         $hours = intval($total / 3600);
                         $seconds_remain = ($total - ($hours * 3600));
                         $minutes = intval($seconds_remain / 60);
                         $seconds = ($seconds_remain - ($minutes * 60));
-                        return array($hours,$minutes,$seconds);
+                        return array($hours, $minutes, $seconds);
                     }
 
                     //check command
-                    if($Q == "in"){
+                    if ($Q == "in") {
 
                         $in_time = $this->security->xss_clean($this->input->post('in_time', TRUE));
                         $change_in_time = strtotime($in_time);
@@ -157,12 +159,12 @@ class Data extends REST_Controller {
                         );
 
                         $go = $this->user_model->insertAbsent($alldata);
-                        if($go == true){
+                        if ($go == true) {
                             echo "Success!";
-                        }else{
+                        } else {
                             echo "Error! Something Went Wrong!";
                         }
-                    }else if($Q == "out"){
+                    } else if ($Q == "out") {
 
                         $out_time = $this->security->xss_clean($this->input->post('out_time', TRUE));
                         $change_out_time = strtotime($out_time);
@@ -175,16 +177,20 @@ class Data extends REST_Controller {
                         $get_work_hour = gettime($change_out_time - $get_in_database);
                         $work_hour = "$get_work_hour[0]:$get_work_hour[1]:$get_work_hour[2]";
 
-                         //Get over time
+                        //Get over time
                         $get_over_time = gettime($change_out_time - strtotime($data['out']));
-                        if($change_out_time < strtotime($data['out']))
+                        if ($get_in_database > strtotime($data['out']) || $change_out_time < strtotime($data['out']))
                             $over_time = "00:00:00";
                         else
                             $over_time = "$get_over_time[0]:$get_over_time[1]:$get_over_time[2]";
 
                         //Early out time
                         $get_early_out_time = gettime(strtotime($data['out']) - $change_out_time);
-                        $early_out_time = "$get_early_out_time[0]:$get_early_out_time[1]:$get_early_out_time[2]";
+                        if ($get_in_database > strtotime($data['out']))
+                            $early_out_time = "00:00:00";
+                        else
+                            $early_out_time = "$get_early_out_time[0]:$get_early_out_time[1]:$get_early_out_time[2]";
+
 
                         //do SQL
                         $alldata = array(
@@ -198,22 +204,22 @@ class Data extends REST_Controller {
                         );
 
                         $go = $this->user_model->updateAbsent($alldata);
-                        if($go == true){
+                        if ($go == true) {
                             echo "Success!";
-                        }else{
+                        } else {
                             echo "Error! Something Went Wrong!";
                         }
-                    }else{
+                    } else {
                         echo 'Error! Wrong Command!';
                     }
-                }else{
+                } else {
                     echo "The KEY is Wrong!";
                 }
-            }else{
+            } else {
                 echo "Please Setting KEY First!";
             }
 
-        }else{
+        } else {
             echo "You can't access this page!";
         }
     }
