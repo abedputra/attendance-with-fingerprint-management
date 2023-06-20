@@ -2,6 +2,7 @@
 # ===================
 # 🛑  We no longer support this system, please see the latest version with <a href="https://codecanyon.net/item/attendance-with-fingerprint-android-system-managemnet/25407573">Laravel here</a> 🛑 
 # ===================
+![banner_muliatech](https://github.com/abedputra/Attendance-login-system/assets/11581453/fdce5763-5ff4-432c-8592-69d170364ac5)
 
 <img src="https://user-images.githubusercontent.com/11581453/71761352-d3529200-2f04-11ea-8880-304bf4b4b849.png" width="150">
 
